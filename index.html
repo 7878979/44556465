@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今天吃什麼？午餐命運輪盤</title>
+    <!-- 引入 Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-amber-50 to-orange-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 text-center">
+        <!-- 標題 -->
+        <h1 class="text-3xl font-bold text-orange-600 mb-2">🍱 午餐命運輪盤</h1>
+        <p class="text-gray-500 text-sm mb-6">治癒你的選擇障礙，順便幫你看緊荷包！</p>
+
+        <!-- 結果顯示區 -->
+        <div id="result-box" class="bg-orange-50 border-2 border-dashed border-orange-300 rounded-xl p-6 mb-6">
+            <span id="result-text" class="text-2xl font-bold text-orange-700">準備好決定今天吃什麼了嗎？</span>
+        </div>
+
+        <!-- 抽籤按鈕 -->
+        <button onclick="spinWheel()" id="spin-btn" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition transform active:scale-95 mb-6">
+            🎲 開始抽午餐！
+        </button>
+
+        <!-- 選項管理區 -->
+        <div class="text-left mb-6">
+            <label class="block text-gray-700 font-semibold mb-2 text-sm">目前候選清單：</label>
+            <div id="tag-list" class="flex flex-wrap gap-2 mb-3 max-h-32 overflow-y-auto p-2 bg-gray-50 rounded-lg border">
+                <!-- 動態產生標籤 -->
+            </div>
+            <div class="flex gap-2">
+                <input type="text" id="new-item-input" placeholder="新增想吃的美食..." class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500">
+                <button onclick="addItem()" class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg text-sm">新增</button>
+            </div>
+        </div>
+
+        <!-- 預算小管家 -->
+        <div class="bg-gray-50 rounded-xl p-4 text-left border">
+            <h2 class="font-bold text-gray-700 text-sm mb-2">💰 預算小管家</h2>
+            <div class="flex justify-between text-sm text-gray-600 mb-1">
+                <span>今日已花費：</span>
+                <span id="spent-amount" class="font-bold text-red-500">$0 元</span>
+            </div>
+            <div class="flex gap-2 mt-2">
+                <input type="number" id="cost-input" placeholder="輸入這餐花費" class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500">
+                <button onclick="addCost()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm">記帳</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 簡易 JavaScript 邏輯 -->
+    <script>
+        // 預設選項
+        let items = ["排骨便當", "濃郁拉麵", "健康沙拉", "義大利麵", "水餃鍋貼", "速食漢堡", "日式咖哩", "牛肉麵"];
+        let totalSpent = 0;
+
+        // 初始化畫面
+        function renderTags() {
+            const tagList = document.getElementById('tag-list');
+            tagList.innerHTML = '';
+            items.forEach((item, index) => {
+                tagList.innerHTML += `
+                    <span class="bg-orange-100 text-orange-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
+                        ${item}
+                        <button onclick="removeItem(${index})" class="text-orange-400 hover:text-red-600 font-bold ml-1">×</button>
+                    </span>
+                `;
+            });
+        }
+
+        // 新增選項
+        function addItem() {
+            const input = document.getElementById('new-item-input');
+            const val = input.value.trim();
+            if (val && !items.includes(val)) {
+                items.push(val);
+                input.value = '';
+                renderTags();
+            }
+        }
+
+        // 刪除選項
+        function removeItem(index) {
+            if (items.length <= 1) {
+                alert("至少要保留一個選項喔！");
+                return;
+            }
+            items.splice(index, 1);
+            renderTags();
+        }
+
+        // 抽籤動畫與邏輯
+        function spinWheel() {
+            if (items.length === 0) {
+                alert("請先新增至少一個美食選項！");
+                return;
+            }
+
+            const resultText = document.getElementById('result-text');
+            const spinBtn = document.getElementById('spin-btn');
+            spinBtn.disabled = true;
+            
+            let count = 0;
+            let maxCount = 15; // 跳動次數
+            
+            let interval = setInterval(() => {
+                let randomIndex = Math.floor(Math.random() * items.length);
+                resultText.innerText = items[randomIndex];
+                count++;
+                
+                if (count >= maxCount) {
+                    clearInterval(interval);
+                    spinBtn.disabled = false;
+                }
+            }, 100);
+        }
+
+        // 記帳功能
+        function addCost() {
+            const costInput = document.getElementById('cost-input');
+            const cost = parseFloat(costInput.value);
+            if (!isNaN(cost) && cost > 0) {
+                totalSpent += cost;
+                document.getElementById('spent-amount.innerText').innerText = `$${totalSpent} 元`;
+                // 為了安全修正抓取 id
+                document.getElementById('spent-amount').innerText = `$${totalSpent} 元`;
+                costInput.value = '';
+            } else {
+                alert("請輸入有效的金額！");
+            }
+        }
+
+        // 網頁載入完成後渲染標籤
+        renderTags();
+    </script>
+</body>
+</html>
